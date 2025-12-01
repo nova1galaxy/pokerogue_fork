@@ -21,6 +21,7 @@ build
 # Editor directories and files (excluding `extensions.json` for devcontainer)
 *.code-workspace
 .vscode/*
+release
 .zed
 !.vscode/extensions.json
 !.vscode/spdx.code-snippets
