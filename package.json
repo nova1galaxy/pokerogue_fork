@@ -37,7 +37,8 @@
     "update-assets": "git submodule update --progress --init --recursive --depth 1 assets",
     "update-assets:remote": "git submodule update --progress --init --recursive --force --remote --depth 1 assets",
     "update-submodules": "pnpm update-locales && pnpm update-assets",
-    "update-submodules:remote": "pnpm update-locales:remote && pnpm update-assets:remote"
+    "update-submodules:remote": "pnpm update-locales:remote && pnpm update-assets:remote",
+    "dist": "pnpm build:app && electron-builder"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.8",
@@ -84,5 +85,25 @@
   "engines": {
     "node": ">=24.9.0"
   },
-  "packageManager": "pnpm@10.24.0"
+  "packageManager": "pnpm@10.24.0",
+  "build": {
+    "appId": "com.nova1galaxy.pokerogue",
+    "productName": "PokeRogue Mod",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron-main.cjs",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "public/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
 }
