@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.11.3",
   "type": "module",
+  "main": "electron-main.js",
   "scripts": {
     "start:prod": "vite --mode production",
     "start:beta": "vite --mode beta",
@@ -49,6 +50,8 @@
     "@vitest/utils": "^4.0.14",
     "chalk": "^5.6.2",
     "dependency-cruiser": "^17.3.1",
+    "electron": "^39.2.4",
+    "electron-builder": "^26.0.12",
     "inquirer": "^13.0.1",
     "jsdom": "^27.2.0",
     "lefthook": "^2.0.4",
