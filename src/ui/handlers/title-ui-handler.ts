@@ -5,6 +5,7 @@ import { globalScene } from "#app/global-scene";
 import { TimedEventDisplay } from "#app/timed-event-manager";
 import { isBeta, isDev } from "#constants/app-constants";
 import { getSplashMessages } from "#data/splash-messages";
+import { Button } from "#enums/buttons";
 import { PlayerGender } from "#enums/player-gender";
 import type { SpeciesId } from "#enums/species-id";
 import { TextStyle } from "#enums/text-style";
@@ -195,5 +196,15 @@ export class TitleUiHandler extends OptionSelectUiHandler {
     // Invert spawn chances on april fools
     const aprilFools = timedEventManager.isAprilFoolsActive();
     return aprilFools === !!randInt(FAKE_TITLE_LOGO_CHANCE) ? "logo_fake" : "logo";
+  }
+
+  override processInput(button: Button): boolean {
+    if (button === Button.ACTION) {
+      const ui = this.getUi();
+      ui.setMode(UiMode.MENU);
+      ui.playSelect();
+      return true;
+    }
+    return super.processInput(button);
   }
 }

@@ -1,58 +1,34 @@
-import { pokerogueApi } from "#api/pokerogue-api";
-import { bypassLogin } from "#constants/app-constants";
 import type { UserInfo } from "#types/user-info";
 import { randomString } from "#utils/common";
 
-export let loggedInUser: UserInfo | null = null;
-// This is a random string that is used to identify the client session - unique per session (tab or window) so that the game will only save on the one that the server is expecting
+// --- CONFIGURATION UTILISATEUR FORCÉE ---
+// On crée un utilisateur par défaut.
+// Le jeu pensera que tu es connecté dès le lancement.
+const DEFAULT_USER: UserInfo = {
+  // Si un nom traîne dans le stockage on le prend, sinon on t'appelle "Red"
+  username: localStorage.getItem("offlineUsername") || "Red",
+  token: "offline_token_force",
+  trainerId: 1, // ID arbitraire
+  secretId: 1,
+  lastSessionSlot: 0,
+  gender: 0,
+  hasAdminRole: true, // Mode admin activé pour le confort
+  settings: {},
+} as unknown as UserInfo;
+
+// On initialise la variable directement avec cet utilisateur
+// Comme ce n'est pas "null", le jeu sautera l'écran de login
+export let loggedInUser: UserInfo | null = DEFAULT_USER;
+
 export const clientSessionId = randomString(32);
 
 export function initLoggedInUser(): void {
-  loggedInUser = {
-    username: "Guest",
-    lastSessionSlot: -1,
-    discordId: "",
-    googleId: "",
-    hasAdminRole: false,
-  };
+  // Si le jeu essaie de déconnecter ou reset, on remet l'utilisateur par défaut
+  loggedInUser = DEFAULT_USER;
 }
 
 export async function updateUserInfo(): Promise<[boolean, number]> {
-  if (bypassLogin) {
-    loggedInUser = {
-      username: "Guest",
-      lastSessionSlot: -1,
-      discordId: "",
-      googleId: "",
-      hasAdminRole: false,
-    };
-    let lastSessionSlot = -1;
-    for (let s = 0; s < 5; s++) {
-      if (localStorage.getItem(`sessionData${s ? s : ""}_${loggedInUser.username}`)) {
-        lastSessionSlot = s;
-        break;
-      }
-    }
-    loggedInUser.lastSessionSlot = lastSessionSlot;
-    // Migrate old data from before the username was appended
-    ["data", "sessionData", "sessionData1", "sessionData2", "sessionData3", "sessionData4"].forEach(d => {
-      const lsItem = localStorage.getItem(d);
-      if (lsItem && !!loggedInUser?.username) {
-        const lsUserItem = localStorage.getItem(`${d}_${loggedInUser.username}`);
-        if (lsUserItem) {
-          localStorage.setItem(`${d}_${loggedInUser.username}_bak`, lsUserItem);
-        }
-        localStorage.setItem(`${d}_${loggedInUser.username}`, lsItem);
-        localStorage.removeItem(d);
-      }
-    });
-    return [true, 200];
-  }
-
-  const [accountInfo, status] = await pokerogueApi.account.getInfo();
-  if (!accountInfo) {
-    return [false, status];
-  }
-  loggedInUser = accountInfo;
+  // Le jeu va demander "Est-ce que le compte est valide ?"
+  // On répond toujours "OUI" (True, code 200) immédiatement.
   return [true, 200];
 }
