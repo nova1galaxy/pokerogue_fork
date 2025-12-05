@@ -1,5 +1,4 @@
 import { pokerogueApi } from "#api/pokerogue-api";
-import { loggedInUser } from "#app/account";
 import { FAKE_TITLE_LOGO_CHANCE } from "#app/constants";
 import { timedEventManager } from "#app/global-event-manager";
 import { globalScene } from "#app/global-scene";
@@ -22,8 +21,6 @@ export class TitleUiHandler extends OptionSelectUiHandler {
   private static readonly BATTLES_WON_FALLBACK: number = -1;
 
   private titleContainer: Phaser.GameObjects.Container;
-  private usernameLabel: Phaser.GameObjects.Text;
-  private playerCountLabel: Phaser.GameObjects.Text;
   private splashMessage: string;
   private splashMessageText: Phaser.GameObjects.Text;
   private eventDisplay: TimedEventDisplay;
@@ -35,21 +32,6 @@ export class TitleUiHandler extends OptionSelectUiHandler {
    * Returns the username of logged in user. If the username is hidden, the trainer name based on gender will be displayed.
    * @returns The username of logged in user
    */
-  private getUsername(): string {
-    const usernameReplacement = i18next.t(
-      globalScene.gameData.gender === PlayerGender.FEMALE ? "trainerNames:playerF" : "trainerNames:playerM",
-    );
-
-    const displayName = globalScene.hideUsername
-      ? usernameReplacement
-      : (loggedInUser?.username ?? i18next.t("common:guest"));
-
-    return i18next.t("menu:loggedInAs", { username: displayName });
-  }
-
-  updateUsername() {
-    this.usernameLabel.setText(this.getUsername());
-  }
 
   constructor(mode: UiMode = UiMode.TITLE) {
     super(mode);
@@ -79,16 +61,6 @@ export class TitleUiHandler extends OptionSelectUiHandler {
       this.titleContainer.add(this.eventDisplay);
     }
 
-    const labelPosX = scaledWidth - 2;
-    // Actual y positions will be determined after the title menu has been populated with options
-    this.usernameLabel = addTextObject(labelPosX, 0, this.getUsername(), TextStyle.MESSAGE, { fontSize: "54px" }) // formatting
-      .setOrigin(1, 0);
-
-    this.playerCountLabel = addTextObject(labelPosX, 0, `? ${i18next.t("menu:playersOnline")}`, TextStyle.MESSAGE, {
-      // formatting
-      fontSize: "54px",
-    }).setOrigin(1, 0);
-
     const logoX = logo.x;
     const logoHeight = logo.y + logo.displayHeight;
 
@@ -107,13 +79,7 @@ export class TitleUiHandler extends OptionSelectUiHandler {
     this.appVersionText = addTextObject(logoX - 60, logoHeight + 4, "", TextStyle.MONEY, { fontSize: "54px" }) // formatting
       .setOrigin();
 
-    this.titleContainer.add([
-      logo,
-      this.usernameLabel,
-      this.playerCountLabel,
-      this.splashMessageText,
-      this.appVersionText,
-    ]);
+    this.titleContainer.add([logo, this.splashMessageText, this.appVersionText]);
   }
 
   updateTitleStats(): void {
@@ -123,7 +89,6 @@ export class TitleUiHandler extends OptionSelectUiHandler {
         if (stats == null) {
           return;
         }
-        this.playerCountLabel.setText(`${stats.playerCount} ${i18next.t("menu:playersOnline")}`);
         const splashMessage = this.splashMessage;
         if (splashMessage === "splashMessages:battlesWon") {
           this.splashMessageText.setText(i18next.t(splashMessage, { count: stats.battleCount }));
@@ -166,24 +131,6 @@ export class TitleUiHandler extends OptionSelectUiHandler {
 
     if (!ret) {
       return false;
-    }
-
-    const scaledHeight = globalScene.scaledCanvas.height;
-    const windowHeight = this.getWindowHeight();
-
-    this.updateUsername();
-
-    // Moving username and player count to top of the menu
-    // and sorting it, to display the shorter one on top
-    const UPPER_LABEL = scaledHeight - 23 - windowHeight;
-    const LOWER_LABEL = scaledHeight - 13 - windowHeight;
-
-    if (this.usernameLabel.width < this.playerCountLabel.width) {
-      this.usernameLabel.setY(UPPER_LABEL);
-      this.playerCountLabel.setY(LOWER_LABEL);
-    } else {
-      this.usernameLabel.setY(LOWER_LABEL);
-      this.playerCountLabel.setY(UPPER_LABEL);
     }
 
     this.splashMessage = randItem(getSplashMessages());
